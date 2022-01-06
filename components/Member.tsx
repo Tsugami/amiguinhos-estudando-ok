@@ -1,6 +1,6 @@
-import { Avatar, Box, Text, FlexProps, Flex, Badge } from "@chakra-ui/react";
-import { motion } from "framer-motion";
-import { getAvatarURL, GuildMember } from "../lib/discord";
+import { Avatar, Box, Text, FlexProps, Flex, Badge } from '@chakra-ui/react';
+import { motion } from 'framer-motion';
+import { getAvatarURL, GuildMember } from '../lib/discord';
 
 type Props = {
   member: GuildMember;
@@ -23,7 +23,7 @@ export const Member = ({ member, constraintsRef }: Props) => {
       <Box ml="3">
         <Text fontWeight="bold">{member.name}</Text>
         <Badge ml="1" colorScheme="green">
-          {member.bot ? "Bot" : "User"}
+          User
         </Badge>
       </Box>
     </MotionFlex>

@@ -1,20 +1,22 @@
 import type {
   RESTGetAPIGuildMembersResult,
   APIGuildMember,
-} from "discord-api-types";
+} from 'discord-api-types/v9';
 
 export type GuildMember = {
-  name: string;
+  avatar: string | null;
+  discriminator: number;
   id: string;
-  avatar: string;
-  bot: boolean;
+  name: string;
 };
+
+const API_URL = 'https://discord.com/api/v9' as const;
+const CDN_URL = 'https://cdn.discordapp.com' as const;
 
 export const getGuildMembers = async () => {
   const guildID = process.env.DISCORD_GUILD_ID;
   const botToken = process.env.DISCORD_TOKEN;
-  const base_url = "https://discord.com/api/v9";
-  const uri = `${base_url}/guilds/${guildID}/members?limit=100`;
+  const uri = `${API_URL}/guilds/${guildID}/members?limit=100`;
 
   const res = await fetch(uri, {
     headers: {
@@ -33,14 +35,14 @@ export const getGuildMembers = async () => {
 
 const normalizeResults = (results: APIGuildMember[]): GuildMember[] => {
   return results.reduce<GuildMember[]>((acc, member) => {
-    const user = member.user;
+    const { user } = member;
     if (!user || user.bot) return acc;
 
     const newMember: GuildMember = {
-      name: member.nick || user.username || "Unknown",
+      avatar: member.avatar ?? user.avatar,
+      discriminator: parseInt(user.discriminator, 10),
       id: user.id,
-      avatar: user.avatar ?? "",
-      bot: false,
+      name: member.nick || user.username || 'Unknown',
     };
 
     acc.push(newMember);
@@ -48,7 +50,9 @@ const normalizeResults = (results: APIGuildMember[]): GuildMember[] => {
     return acc;
   }, []);
 };
-
-export const getAvatarURL = (member: GuildMember) => {
-  return `https://cdn.discordapp.com/avatars/${member.id}/${member.avatar}.png`;
+export const getAvatarURL = (member: GuildMember): string => {
+  if (member.avatar) {
+    return `${CDN_URL}/avatars/${member.id}/${member.avatar}.png`;
+  }
+  return `${CDN_URL}/embed/avatars/${member.discriminator % 5}.png`;
 };
